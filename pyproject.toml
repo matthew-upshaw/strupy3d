@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 numpy = "1.26.4"
-scipty = "1.13.1"
+scipy = "1.13.1"
 
 
 [build-system]

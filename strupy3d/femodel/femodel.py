@@ -285,6 +285,7 @@ class FEModel:
         Deletes a node from the finite element model.
 
         Parameters
+        ----------
         node_id : int
             unique id for the node to be deleted
         """
@@ -364,7 +365,7 @@ class FEModel:
 
         if combination_type != "None":
             load_matrix = np.hstack((load_matrix, self.global_combined_load_matrix))
-            
+
         num_lcs = load_matrix.shape[1]
         displacement_vectors = np.zeros_like(load_matrix)
 
