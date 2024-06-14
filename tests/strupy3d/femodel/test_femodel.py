@@ -19,6 +19,7 @@ def valid_femodel():
 def test_valid_femodel_initialization(valid_femodel):
     assert valid_femodel.analysis_complete == False
     assert valid_femodel.analysis_ready == False
+    assert np.array_equal(valid_femodel.displacement_vectors, np.zeros([0,0]))
     assert valid_femodel.elements == {}
     assert valid_femodel.element_parameters == {}
     assert np.array_equal(valid_femodel.global_combined_load_matrix, np.zeros([0,0]))
@@ -200,6 +201,48 @@ def test_invalid_prepare_analysis_combination_value(valid_femodel):
     valid_femodel.add_or_update_load(direction="Tz", load_case="DL", magnitude=-5, node_id=2)
 
     with pytest.raises(ValueError):
-        valid_femodel.prepare_analysis(combination_type='invalid')        
+        valid_femodel.prepare_analysis(combination_type='invalid')
+        
+def test_run(valid_femodel):
+    valid_femodel.add_node(coordinates=(0,0,0))
+    valid_femodel.add_node(coordinates=(12,0,0))
+    valid_femodel.add_node(coordinates=(12,0,12))
+    valid_femodel.add_element(node_ids=(1,2), material=steel, section=beam_section)
+    valid_femodel.add_element(node_ids=(2,3), material=steel, section=beam_section)
+    valid_femodel.add_or_update_support(node_id=1, support_type=(1,1,1,0,0,0))
+    valid_femodel.add_or_update_support(node_id=3, support_type=(1,1,1,1,1,1))
+    valid_femodel.add_or_update_load(direction="Tz", load_case="DL", magnitude=-5, node_id=2)
+
+    valid_femodel.run()
+
+    assert valid_femodel.displacement_vectors.shape == (9,7)
+
+def test_prepare_analysis_asd(valid_femodel):
+    valid_femodel.add_node(coordinates=(0,0,0))
+    valid_femodel.add_node(coordinates=(12,0,0))
+    valid_femodel.add_node(coordinates=(12,0,12))
+    valid_femodel.add_element(node_ids=(1,2), material=steel, section=beam_section)
+    valid_femodel.add_element(node_ids=(2,3), material=steel, section=beam_section)
+    valid_femodel.add_or_update_support(node_id=1, support_type=(1,1,1,0,0,0))
+    valid_femodel.add_or_update_support(node_id=3, support_type=(1,1,1,1,1,1))
+    valid_femodel.add_or_update_load(direction="Tz", load_case="DL", magnitude=-5, node_id=2)
+
+    valid_femodel.run(combination_type='asd')
+
+    assert valid_femodel.displacement_vectors.shape == (9,23)
+
+def test_prepare_analysis_lrfd(valid_femodel):
+    valid_femodel.add_node(coordinates=(0,0,0))
+    valid_femodel.add_node(coordinates=(12,0,0))
+    valid_femodel.add_node(coordinates=(12,0,12))
+    valid_femodel.add_element(node_ids=(1,2), material=steel, section=beam_section)
+    valid_femodel.add_element(node_ids=(2,3), material=steel, section=beam_section)
+    valid_femodel.add_or_update_support(node_id=1, support_type=(1,1,1,0,0,0))
+    valid_femodel.add_or_update_support(node_id=3, support_type=(1,1,1,1,1,1))
+    valid_femodel.add_or_update_load(direction="Tz", load_case="DL", magnitude=-5, node_id=2)
+
+    valid_femodel.run(combination_type='lrfd')
+
+    assert valid_femodel.displacement_vectors.shape == (9,23)   
 
 

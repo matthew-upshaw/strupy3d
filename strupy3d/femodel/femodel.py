@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy.sparse import lil_matrix
+from scipy.sparse.linalg import spsolve
 
 from .geometry import (
     Element,
@@ -30,6 +31,9 @@ class FEModel:
         indicates whether the FEModel object has been successfully analyzed
     analysis_ready : bool
         indicates whether the FEModel object is ready to be analyzed
+    displacement_vectors : numpy.ndarray
+        numpy.ndarray representing the displacement vector for each load case
+        or load combination as applicable
     elements : dict
         dictionary of strupy3d.geometry.element.Element objects in the FEModel
         object with element id's as keys
@@ -90,12 +94,15 @@ class FEModel:
         the finite element model.
     delete_support(support_id)
         Deletes a support from the finite element model.
-    prepare_analysis()
+    prepare_analysis(combination_type)
         Prepares the finite element model for analysis.
+    run(combination_type)
+        Runs the analysis of the finite element model.
     """
     def __init__(self):
         self.analysis_complete = False
         self.analysis_ready = False
+        self.displacement_vectors = np.zeros([0,0])
         self.elements = {}
         self.element_parameters = {}
         self.global_combined_load_matrix = np.zeros([0,0])
@@ -340,6 +347,33 @@ class FEModel:
             self.global_combined_load_matrix = self.__apply_load_factors(load_matrix=self.global_load_matrix, combination_type=combination_type.upper())
 
         self.analysis_ready = True
+
+    def run(self, combination_type: str="None"):
+        """
+        Runs the analysis for the finite element model.
+
+        Parameters
+        ----------
+        combination_type : str, optional
+            string representing the load combinations that should be used;
+            options are 'ASD', 'LRFD', and 'None'; default = 'None'
+        """
+        self.prepare_analysis(combination_type=combination_type)
+
+        load_matrix = self.global_load_matrix
+
+        if combination_type != "None":
+            load_matrix = np.hstack((load_matrix, self.global_combined_load_matrix))
+            
+        num_lcs = load_matrix.shape[1]
+        displacement_vectors = np.zeros_like(load_matrix)
+
+        for i_lc in range(num_lcs):
+            displacement_vectors[:,i_lc] = spsolve(self.global_stiffness_matrix, load_matrix[:,i_lc])
+
+        self.displacement_vectors = displacement_vectors
+
+        self.analysis_complete = True
 
     def __apply_load_factors(self, load_matrix: np.ndarray, combination_type: str) -> np.ndarray:
         """
