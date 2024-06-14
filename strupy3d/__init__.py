@@ -1,0 +1,1 @@
+from strupy3d.femodel.femodel import FEModel

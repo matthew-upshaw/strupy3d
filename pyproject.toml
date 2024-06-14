@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "strupy3d"
+version = "0.1.0"
+description = "3-D Finite Element Model solver for analyzing structural models."
+authors = ["Matthew Upshaw <matthew.upshaw02@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "1.26.4"
+scipty = "1.13.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
