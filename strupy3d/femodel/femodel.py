@@ -677,7 +677,7 @@ class FEModel:
             (x, y, z) coordinates indicating the global location of the node
         """
         for node_id in self.nodes:
-            if coordinates == self.nodes[node_id].coordinates:
+            if all(np.isclose(np.asarray(coordinates), np.asarray(self.nodes[node_id].coordinates))):
                 raise ValueError(f"Node already exists at {coordinates}!")
             
     def __validate_add_or_update_support(self, node_id: int):
